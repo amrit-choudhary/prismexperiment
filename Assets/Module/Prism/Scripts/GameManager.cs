@@ -41,6 +41,7 @@ namespace Prism
         public TextMeshProUGUI refractiveIndexText;
         public GameObject water;
         public GameObject boardCanvasGO;
+        public GameObject notesGO;
 
         public GameObject tabGameObject;
 
@@ -214,6 +215,7 @@ namespace Prism
             _ifRefraction = true;
             instructionButton.SetActive(true);
             ShowWater(false);
+            notesGO.SetActive(false);
         }
 
         // Change simulation to the dispersion experiment.
@@ -225,6 +227,7 @@ namespace Prism
             _ifRefraction = false;
             instructionButton.SetActive(true);
             ShowWater(false);
+            notesGO.SetActive(true);
         }
 
         // Go to simulation screen.
