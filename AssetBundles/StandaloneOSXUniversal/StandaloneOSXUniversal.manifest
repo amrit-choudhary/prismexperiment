@@ -1,0 +1,7 @@
+ManifestFileVersion: 0
+CRC: 2901066905
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: prismscene
+      Dependencies: {}

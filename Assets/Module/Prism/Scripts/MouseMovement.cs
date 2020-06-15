@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace  Prism
+namespace Prism
 {
     public class MouseMovement : MonoBehaviour
     {
@@ -13,7 +13,8 @@ namespace  Prism
         public float distanceMax = 15f;
         public float yMinLimit = 0f;
         public float yMaxLimit = 90f;
-        
+        public float zoomFromUI = 0.0f;
+
         Vector3 negDistance;
 
         float x = 0.0f;
@@ -76,7 +77,25 @@ namespace  Prism
                 //Debug.Log("value : " + v);
                 Camera.main.fieldOfView = v;
             }
+
             if (Input.GetAxis("Mouse ScrollWheel") > 0) // forward
+            {
+                float value = Camera.main.fieldOfView;
+                value--;
+                float v = Mathf.Clamp(value, minZoomV, maxZoomV);
+                Camera.main.fieldOfView = v;
+            }
+
+            if (zoomFromUI < 0) // back
+            {
+                float value = Camera.main.fieldOfView;
+                value++;
+                float v = Mathf.Clamp(value, minZoomV, maxZoomV);
+                //Debug.Log("value : " + v);
+                Camera.main.fieldOfView = v;
+            }
+
+            if (zoomFromUI > 0) // forward
             {
                 float value = Camera.main.fieldOfView;
                 value--;

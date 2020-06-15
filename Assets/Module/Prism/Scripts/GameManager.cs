@@ -40,15 +40,19 @@ namespace Prism
 
         public TextMeshProUGUI refractiveIndexText;
         public GameObject water;
+        public GameObject boardCanvasGO;
 
         public GameObject tabGameObject;
 
         public TextMeshProUGUI n1Board;
-        private string _currentRefractiveIndex = "1.5";
+        private string _currentRefractiveIndex = "1.25";
+        private float _currentRefractiveIndexFloat = 1.25f;
         public TextMeshProUGUI n2Board;
         private string _environmentIndex = "1.0";
+        private float _environmentIndexFloat = 1.0f;
         public TextMeshProUGUI aBoard;
         private string _prismAngle = "60";
+        private int _prismAngleInt = 60;
         public TextMeshProUGUI iBoard;
         [HideInInspector] public string _iBoard = "0";
         public TextMeshProUGUI r1Board;
@@ -76,6 +80,8 @@ namespace Prism
 
         public Vector3 test1, test2, test3, test4;
 
+        public MouseMovement mouseMovement;
+
         private void Start()
         {
             SelectTopButtons(0);
@@ -85,14 +91,29 @@ namespace Prism
 
         private void Update()
         {
+            float i = Mathf.Deg2Rad * (180 - Vector3.Angle(rayN1, rayI));
+            float iDeg = i * Mathf.Rad2Deg;
+            float factor1 = _environmentIndexFloat / _currentRefractiveIndexFloat;
+            float factor2 = _currentRefractiveIndexFloat / _environmentIndexFloat;
+            float r1 = Mathf.Asin(factor1 * Mathf.Sin(i)) * Mathf.Rad2Deg;
+            float r2 = _prismAngleInt - r1;
+            float e = Mathf.Asin(factor2 * Mathf.Sin(r2 * Mathf.Deg2Rad)) * Mathf.Rad2Deg;
+
             n1Board.text = _environmentIndex;
             n2Board.text = _currentRefractiveIndex;
-            aBoard.text = _prismAngle + "°";
-            iBoard.text = (180 - Vector3.Angle(rayN1, rayI)).ToString("00") + "°";
-            r1Board.text = (180 - Vector3.Angle(rayN1, rayR1)).ToString("00") + "°";
-            r2Board.text = (Vector3.Angle(rayN2, rayR1)).ToString("00") + "°";
-            eBoard.text = (Vector3.Angle(rayN2, rayR2)).ToString("00") + "°";
-            dBoard.text = Vector3.Angle(rayI, rayR2).ToString("00") + "°";
+            aBoard.text = _prismAngleInt.ToString() + "°";
+
+            iBoard.text = iDeg.ToString("00.00") + "°";
+            r1Board.text = r1.ToString("00.00") + "°";
+            r2Board.text = r2.ToString("00.00") + "°";
+            eBoard.text = e.ToString("00.00") + "°";
+            dBoard.text = (iDeg + e - _prismAngleInt).ToString("00.00");
+
+            //iBoard.text = (180 - Vector3.Angle(rayN1, rayI)).ToString("00.00") + "°";
+            //r1Board.text = (180 - Vector3.Angle(rayN1, rayR1)).ToString("00.0") + "°";
+            //r2Board.text = (_prismAngleInt - (180 - Vector3.Angle(rayN1, rayR1))).ToString("00.0") + "°";
+            //eBoard.text = (Vector3.Angle(rayN2, rayR2)).ToString("00") + "°";
+            //dBoard.text = Vector3.Angle(rayI, rayR2).ToString("00") + "°";
         }
 
         // Change between available prism options.
@@ -104,6 +125,10 @@ namespace Prism
             }
 
             prisms[index_].SetActive(true);
+
+            if (index_ == 0) _prismAngleInt = 30;
+            if (index_ == 1) _prismAngleInt = 60;
+            if (index_ == 2) _prismAngleInt = 75;
 
             prismAngleMultiplier = 1.0f + prismAngleMultiplierFactor * index_;
         }
@@ -125,6 +150,13 @@ namespace Prism
             torchStandTrans.DOLocalMoveY(minY + (maxY - minY) * sliderValue_, moveDuration).OnUpdate(StandMoveUpdate);
         }
 
+        public void ChangeZoom(float sliderValue_)
+        {
+            float f = (sliderValue_ - 0.5f) * 2.0f;
+
+            if (f < -0.1f || f > 0.1f) mouseMovement.zoomFromUI = f;
+            else mouseMovement.zoomFromUI = 0.0f;
+        }
 
         // Change refractive index of the prism.
         public void ChangeRefractiveIndex(float sliderValue_)
@@ -134,7 +166,8 @@ namespace Prism
                 prismProperties[i].index = minIndex + (maxIndex - minIndex) * sliderValue_;
             }
 
-            _currentRefractiveIndex = (1.4f + (1.6f - 1.4f) * sliderValue_).ToString("0.00");
+            _currentRefractiveIndex = (1.2f + (1.3f - 1.2f) * sliderValue_).ToString("0.00");
+            _currentRefractiveIndexFloat = (1.2f + (1.3f - 1.2f) * sliderValue_);
             refractiveIndexText.text = _currentRefractiveIndex;
         }
 
@@ -156,13 +189,20 @@ namespace Prism
             if (isOn_)
             {
                 lightSource.environmentIndex = lightSource.waterIndex;
-                _environmentIndex = "1.3";
+                _environmentIndex = "1.2";
+                _environmentIndexFloat = 1.2f;
             }
             else
             {
                 lightSource.environmentIndex = lightSource.airIndex;
-                _environmentIndex = "1.0";
+                _environmentIndex = "1.00";
+                _environmentIndexFloat = 1.0f;
             }
+        }
+
+        public void ShowBoard(bool isOn_)
+        {
+            boardCanvasGO.SetActive(isOn_);
         }
 
         // Change simulation to the refraction experiment.
